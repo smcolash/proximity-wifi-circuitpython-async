@@ -1,0 +1,20 @@
+#
+# ignore the download cache
+#
+.cache
+
+#
+# ignore the staging area
+#
+.staging
+
+#
+# ignore the REPL log
+#
+repl.log
+
+#
+# ignore vim temp files
+#
+.*.sw*
+
