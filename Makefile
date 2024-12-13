@@ -1,6 +1,9 @@
 #
 # use the common build settings
 #
+submodules ::
+	git submodule update --init
+
 include submodules/linux-circuitpython-esp32/mak/circuitpython.mak
 
 staging ::
@@ -21,7 +24,4 @@ staging ::
 #staging ::
 #	mkdir -p .staging/assets
 #	cp -rf source/assets/* .staging/assets/
-
-submodules ::
-	git submodule update --init
 
