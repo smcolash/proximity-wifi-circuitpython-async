@@ -1,6 +1,7 @@
 #
 # use the common build settings
 #
+all :: submodules
 submodules ::
 	git submodule update --init
 
