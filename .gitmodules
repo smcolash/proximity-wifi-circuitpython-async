@@ -1,0 +1,3 @@
+[submodule "submodules/linux-circuitpython-esp32"]
+	path = submodules/linux-circuitpython-esp32
+	url = git@github.com:smcolash/linux-circuitpython-esp32.git

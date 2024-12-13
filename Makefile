@@ -22,3 +22,6 @@ staging ::
 #	mkdir -p .staging/assets
 #	cp -rf source/assets/* .staging/assets/
 
+submodules ::
+	git submodule update --init
+
