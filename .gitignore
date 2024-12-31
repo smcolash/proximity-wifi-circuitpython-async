@@ -18,3 +18,8 @@ repl.log
 #
 .*.sw*
 
+#
+# keep secrets out of the project
+#
+source/secrets.json
+

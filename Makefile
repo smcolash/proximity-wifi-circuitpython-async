@@ -5,8 +5,16 @@ all :: submodules
 submodules ::
 	git submodule update --init
 
+#
+# boilerplate support
+#
+ifneq ($(findstring submodules,$(MAKECMDGOALS)),submodules)
 include submodules/linux-circuitpython-esp32/mak/circuitpython.mak
+endif
 
+#
+# stage additional code for the build
+#
 staging ::
 	cp -rf .cache/$(BUNDLE)/lib/adafruit_connection_manager.mpy .staging/lib
 	cp -rf .cache/$(BUNDLE)/lib/adafruit_hashlib* .staging/lib
