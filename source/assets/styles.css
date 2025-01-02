@@ -1,0 +1,30 @@
+div.list {
+  counter-reset: list-number;
+
+  font-family: monospace;
+  overflow-y: scroll;
+  border-radius: 4px;
+  border: 1px solid black;
+  height: 20rem;
+  line-height: normal;
+}
+
+
+div.list div {
+  counter-increment: list-number;
+}
+
+div.list div:before {
+  content: counter(list-number);
+  display: inline-block;
+  width: 4rem;
+  padding-right: 0.5rem;
+  margin-right: 0.5rem;
+  text-align: end;
+
+  background-color: var(--bs-dark-bg-subtle) !important;
+
+  border-right: 2px solid black;
+
+}
+
