@@ -3,7 +3,7 @@
 #
 all :: submodules
 submodules ::
-	git submodule update --init
+	git submodule update --init --remote
 
 #
 # boilerplate support
@@ -13,11 +13,12 @@ include submodules/linux-circuitpython-esp32/mak/circuitpython.mak
 endif
 
 #
-# stage additional code for the build
+# stage additional library code for the build
 #
 staging ::
 	cp -rf .cache/$(BUNDLE)/lib/adafruit_connection_manager.mpy .staging/lib
 	cp -rf .cache/$(BUNDLE)/lib/adafruit_hashlib* .staging/lib
+	cp -rf .cache/$(BUNDLE)/lib/adafruit_httpserver .staging/lib
 	cp -rf .cache/$(BUNDLE)/lib/adafruit_ntp* .staging/lib
 	cp -rf .cache/$(BUNDLE)/lib/adafruit_requests* .staging/lib
 	cp -rf .cache/$(BUNDLE)/lib/adafruit_ticks* .staging/lib
@@ -33,4 +34,8 @@ staging ::
 #staging ::
 #	mkdir -p .staging/assets
 #	cp -rf source/assets/* .staging/assets/
+
+staging ::
+	mkdir -p .staging/assets
+	cp -rf source/assets/* .staging/assets/
 

@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 
 import adafruit_hashlib as hashlib
+#FIXME# import adafruit_httpserver as httpserver
 import adafruit_ntp
-import adafruit_requests
+import adafruit_requests as requests
 import circuitpython_hmac as hmac
 
 import asyncio
@@ -11,6 +12,7 @@ import board
 import digitalio
 import gc
 import json
+import mdns
 import microcontroller
 import socketpool
 import ssl
@@ -21,51 +23,20 @@ import wifi
 
 # ------------------------------------------------------------
 
-class AccessPoint (object):
-    ssid = None
-    channel = None
-    location = None
+def logger (text):
+    print (text)
 
-    def __init__ (self, config, delay=10):
-        self.config = config
-        self.delay = delay
+def info (text):
+    logger (f'info - {text}')
 
-    async def __aenter__ (self):
-        while True:
-            #
-            # scan for the list of currently available networks
-            #
-            networks = []
-            for network in wifi.radio.start_scanning_networks ():
-                known = ' '
+def warn (text):
+    logger (f'warning - {text}')
 
-                if network.ssid in self.config:
-                    networks.append (network)
-                    known = '*'
+def error (text):
+    logger (f'error - {text}')
 
-                print (f'{known} {network.ssid:<32} {network.rssi:>4} {network.channel}')
-
-            wifi.radio.stop_scanning_networks ()
-
-            #
-            # select the strongest known network
-            #
-            for network in sorted (networks, key=lambda item: item.rssi, reverse=True):
-                wifi.radio.connect (network.ssid, self.config[network.ssid]['password'])
-                if wifi.radio.connected:
-                    AccessPoint.ssid = wifi.radio.ap_info.ssid
-                    AccessPoint.channel = wifi.radio.ap_info.channel
-                    AccessPoint.location = self.config[self.ssid]['location']
-
-                    return self
-
-            #
-            # wait and try again if none found
-            #
-            await asyncio.sleep (self.delay)
-
-    async def __aexit__ (self, exc_type, exc_value, exc_tb):
-        wifi.radio.stop_station ()
+def fixme (text):
+    logger (f'FIXME :: {text}')
 
 # ------------------------------------------------------------
 
@@ -103,13 +74,15 @@ class Output (object):
 
             return Output (id, config)
         except Exception as e:
-            traceback.print_exception (e)
+            logger ('\n'.join (traceback.format_exception (e)))
 
     def __init__ (self, id, config):
         self.name = id
-        self.type = config.get ('type', 'output')
-        self.enabled = config.get ('enabled', True)
-        self.timeout = config.get ('timeout', 30 * 60)
+        self.config = config
+
+        self.type = self.config.get ('type', 'output')
+        self.enabled = self.config.get ('enabled', True)
+        self.timeout = self.config.get ('timeout', 30 * 60)
 
         self.pending = False
         self.known = False
@@ -121,13 +94,15 @@ class Output (object):
 
     def __str__ (self):
         delta = time.time () - self.last
-        return f'{self.type:8} {self.name:24} {self.state:1} {"P" if self.pending else "_"} {"K" if self.known else "_"} {delta}'
+        return f'{self.type:8} {self.name:24} {self.state:1} {"P" if self.pending else "_"} {"K" if self.known else "_"} {delta:5}'
 
     def update (self, state=None):
         #
         # handle change of state
         #
-        print (f'U: {self}')
+        memory = gc.mem_free ()
+        logger (f'U: {self} {memory}')
+
         if state is not None:
             if self.state != state:
                 self.pending = True
@@ -143,7 +118,7 @@ class Output (object):
         # handle timeout
         #
         if time.time () - self.last > self.timeout:
-            print (f'T: {self}')
+            logger (f'T: {self}')
             self.update (False)
 
     @classmethod
@@ -167,12 +142,13 @@ class Output (object):
         # set any new output states
         #
         for name, output in cls.inventory.items ():
-            print (f'S: {output}')
+            memory = gc.mem_free ()
+            logger (f'S: {output} {memory}')
             output.activate ()
 
     def activate (self):
         self.pending = False
-        print (f'A: {self}')
+        logger (f'A: {self}')
 
 # ------------------------------------------------------------
 
@@ -202,6 +178,8 @@ class LEDOutput (GPIOOutput):
 # ------------------------------------------------------------
 
 class TuyaOutput (Output):
+    http = None
+
     def __init__ (self, id, config):
         super ().__init__ (id, config)
 
@@ -213,10 +191,8 @@ class TuyaOutput (Output):
         self.server = config['server']
 
         self.timestamp = 0
-        self.http = None
         self.token = ''
         self.authorization = None
-
 
     def request (self, pool, method, api, body = ''):
         hash = hashlib.sha256 (body.encode ()).hexdigest ()
@@ -235,8 +211,8 @@ class TuyaOutput (Output):
         if self.token != '':
             headers['access_token'] = self.token
 
-        if self.http == None:
-            self.http = adafruit_requests.Session (pool, ssl.create_default_context ())
+        if self.http is None:
+            self.http = requests.Session (pool, ssl.create_default_context ())
 
         with self.http.request (method, f'{self.server}{api}', headers=headers, data=body) as response:
             data = response.json ()
@@ -244,8 +220,6 @@ class TuyaOutput (Output):
         gc.collect ()
 
         return data
-
-
 
     def activate (self):
         if self.pending:
@@ -272,7 +246,6 @@ class TuyaOutput (Output):
                 self.authorization = response['result']
                 self.token = response['result']['access_token']
                 self.timeout = response['result']['expire_time']
-                #print (response)
 
             #
             # send the control request for the device
@@ -313,39 +286,55 @@ class Beacon (object):
 
         for id, beacon in cls.inventory.items ():
             if id in dumb:
-                print ('-' * 35)
-                print (f'F: {beacon.name}')
-                print (dumb)
-                print (' ' * dumb.index (id) + '-----------------')
+                logger ('-' * 35)
+                logger (f'F: {beacon.name}')
+                logger (dumb)
+                logger (' ' * dumb.index (id) + '-----------------')
                 beacon.frames += 1
 
 #
-# update output state after beacons have been identified
+# task to monitor beacon and timeout status
 #
-async def tick (config, lock):
+async def system_monitor_task (configuration, lock):
     while True:
+        gc.collect ()
+        await asyncio.sleep (1.0)
+
+        #
+        # wait to be connected to an access point
+        #
+        if not wifi.radio.connected:
+            continue
+
+        #
+        # wait until a location is set
+        #
+        location = configuration['system']['location']
+        if location is None:
+            continue
+
         try:
             #
             # process any new beacon frames
             #
             for name, beacon in Beacon.inventory.items ():
-                #DEBUG# print (f'B: {beacon}')
+                #DEBUG# logger (f'B: {beacon}')
 
                 #
                 # update outputs based on beacon activity
                 #
-                if beacon.frames > 0 and beacon.name in config['mapping'][AccessPoint.location]:
+                if beacon.frames > 0 and beacon.name in configuration['mapping'][location]:
                     try:
-                        print ('==========')
-                        print (f'L: {AccessPoint.location}')
-                        print (f'M: {name}')
-                        print (f'N: {beacon.name}')
-                        for output in config['mapping'][AccessPoint.location][beacon.name]:
-                            print (f'P: {output}')
+                        logger ('==========')
+                        logger (f'L: {location}')
+                        logger (f'M: {name}')
+                        logger (f'N: {beacon.name}')
+                        for output in configuration['mapping'][location][beacon.name]:
+                            logger (f'P: {output}')
                             Output.inventory[output].update (True)
-                        print ('==========')
+                        logger ('==========')
                     except Exception as e:
-                        traceback.print_exception (e)
+                        logger ('\n'.join (traceback.format_exception (e)))
 
                     beacon.frames = 0
 
@@ -353,31 +342,31 @@ async def tick (config, lock):
             # update the state of all of the outputs in the local mapping
             #
             outputs = set ()
-            for items in config['mapping'][AccessPoint.location].values ():
+            for items in configuration['mapping'][location].values ():
                 outputs.update (items)
 
-            for name in sorted (items):
+            for name in sorted (outputs):
                 Output.inventory[name].update ()
+
+            #
+            # temporarily release to the other tasks
+            #
+            await asyncio.sleep (0)
 
             #
             # apply any pending changes
             #
             if Output.waiting ():
                 async with lock:
-                    async with AccessPoint (config['wifi']) as ap:
-                        Output.synchronize (config['mapping'], ap.location)
+                    Output.synchronize (configuration['mapping'], location)
 
         except Exception as e:
-            traceback.print_exception (e)
-            pass
-
-        gc.collect ()
-        await asyncio.sleep (1.0)
+            logger ('\n'.join (traceback.format_exception (e)))
 
 #
-# periodically resynchronize everything
+# task to periodically resynchronize the output status
 #
-async def resync (config, lock):
+async def resynchronize_task (configuration, lock):
     #
     # loop forever
     #
@@ -397,93 +386,315 @@ async def resync (config, lock):
             pass
 
 #
-# watch for WiFi header frames that correspond to the configured beacons
+# task to listen for WiFi packets as inputs
 #
-async def sniff (config, lock):
+async def packet_sniffer_task (configuration, lock):
     #
     # monitor packet headers on the current access point channel
     #
     while True:
+        gc.collect ()
+        await asyncio.sleep (0)
+
+        #
+        # wait to be connected to an access point
+        #
+        if not wifi.radio.connected:
+            continue
+
+        #
+        # wait until the outputs are synchronized
+        #
         if Output.waiting ():
-            await asyncio.sleep (1.0)
-        else:
-            async with lock:
-                #
-                # initialize WiFi for packet sniffing
-                #
-                print ('-' * 35)
-                print (f'listening on channel {AccessPoint.channel} [{AccessPoint.location}]')
-                monitor = wifi.Monitor (channel=AccessPoint.channel)
+            continue
 
-                #
-                # loop until an output needs to be synchronized
-                #
-                while not Output.waiting ():
+        #
+        # start monitoring packets
+        #
+        monitor = wifi.Monitor (channel=wifi.radio.ap_info.channel)
+
+        logger ('-' * 35)
+        info (f'listening on channel {wifi.radio.ap_info.channel}')
+        logger ('-' * 35)
+
+        while wifi.radio.connected:
+            gc.collect ()
+            await asyncio.sleep (0)
+
+            try:
+                async with lock:
+                    #
+                    # temporarily stop to synchronize outputs
+                    #
+                    if Output.waiting ():
+                        info ('pausing packet analysis')
+                        monitor.deinit ()
+                        break
+
+                    #
+                    # get the next usable packet
+                    #
                     packet = monitor.packet ()
-                    if len (packet) == 0:
-                        await asyncio.sleep (0.001)
-                        continue
 
-                    raw = packet[wifi.Packet.RAW]
-                    Beacon.match (raw)
+                    #
+                    # check for a match against the becaons
+                    #
+                    Beacon.match (packet[wifi.Packet.RAW])
 
-                    del raw
-                    gc.collect ()
+                    #
+                    # clean up immediately
+                    #
+                    del packet
+            except:
+                pass
+
+        info ('stopped packet analysis')
+
+#
+# task to provide a web interface for status and configuration
+#
+async def web_server_task (configuration, lock):
+    fixme ('D1')
+    import adafruit_httpserver as httpserver
+
+    fixme ('D2')
+    pool = socketpool.SocketPool (wifi.radio)
+    #pool = configuration['system']['pool']
+    server = httpserver.Server (pool, '/assets', debug=True)
+
+    fixme ('D3')
+    @server.route ('/', 'GET')
+    def handler (request: httpserver.Request):
+        return httpserver.FileResponse (request, "/index.html")
+
+    @server.route ('/api/v1/config', 'GET')
+    def handler (request: httpserver.Request):
+        return httpserver.JSONResponse (request, configuration)
+
+    @server.route ('/api/v1/status', 'GET')
+    def handler (request: httpserver.Request):
+        data = {'status': {}}
+        return httpserver.JSONResponse (request, data)
+
+    @server.route ('/api/v1/events', 'GET')
+    def handler( request: httpserver.Request):
+
+        async def task (sse):
+            try:
+                for loop in range (50):
+                    await asyncio.sleep (1.0)
+                    sse.send_event (json.dumps ({'index': loop}), event="event_name")
+            except:
+                pass
+
+            sse.close()
+
+        sse = httpserver.SSEResponse (request)
+        asyncio.create_task (task (sse))
+
+        return sse
+
+    fixme ('D4')
+    while True:
+        #
+        # start the web server
+        #
+        try:
+            fixme ('D5')
+            server.start ('0.0.0.0', 80)
+
+            fixme ('D6')
+            while True:
+                server.poll ()
+                await asyncio.sleep (0)
+
+        except asyncio.CancelledError:
+            info ('web server task cancelled')
+            return
+
+        except Exception as e:
+            logger ('\n'.join (traceback.format_exception (e)))
+
+#
+# task to monitor button and set system mode
+#
+async def configuration_task (configuration, lock):
+    # this pin is specific to the ESP32 DevKit V1
+    button = digitalio.DigitalInOut (microcontroller.pin.GPIO0)
+    button.direction = digitalio.Direction.INPUT
+    button.pull = digitalio.Pull.UP
+
+    mdns_server = mdns.Server (wifi.radio)
+    mdns_server.hostname = configuration['system']['hostname']
+    mdns_server.advertise_service (service_type='_http', protocol='_tcp', port=80)
+
+    info (f'using MDNS name of {configuration["system"]["hostname"]}.local')
+
+    station = True
+    ready = False
+
+    interval = 0.25
+    count = 0
+
+    server = None
+
+    while True:
+        if button.value == False:
+            count = min (5 / interval, count + 1)
+            fixme (count)
+        else:
+            if count == 5 / interval:
+                info ('changing mode')
+                station = station ^ True
+                ready = False
+                count = 0
+
+        if station:
+            if not wifi.radio.connected:
+                ready = False
+
+            if not ready:
+                info ('starting station (client) mode')
+
+                if server is not None:
+                    server.cancel ()
+
+                try:
+                    del httpserver
+                except:
+                    pass
+
+                wifi.radio.stop_ap ()
 
                 #
-                # stop using the WiFi
+                # scan for currently available networks
                 #
-                monitor.deinit ()
+                networks = []
+                for network in wifi.radio.start_scanning_networks ():
+                    known = ' '
+
+                    if network.ssid in configuration['wifi']:
+                        networks.append (network)
+                        known = '*'
+
+                    logger (f'{known} {network.ssid:<32} {network.rssi:>4} {network.channel}')
+
+                wifi.radio.stop_scanning_networks ()
+
+                #
+                # connect to the strongest known network
+                #
+                for network in sorted (networks, key=lambda item: item.rssi, reverse=True):
+                    try:
+                        wifi.radio.connect (network.ssid, configuration['wifi'][network.ssid]['password'])
+                        await asyncio.sleep (0)
+                        location = configuration['wifi'][wifi.radio.ap_info.ssid]['location']
+                        configuration['system']['location'] = location
+
+                        info (f'connected to access point {wifi.radio.ap_info.ssid}')
+                        info (f'location set to {location}')
+                        info (f'assigned address of {wifi.radio.ipv4_address}')
+                        ready = True
+                        break
+                    except:
+                        pass
+
+                #
+                # wait and try again if not connected
+                #
+                if not ready:
+                    error (f'failed to connect to a known network, retrying...')
+                    await asyncio.sleep (5)
+
+            pass
+        else:
+            if not ready:
+                info ('starting access point (server) mode')
+                wifi.radio.stop_station ()
+
+                import adafruit_httpserver as httpserver
+
+                wifi.radio.start_ap (configuration['system']['hostname'])
+                await asyncio.sleep (0)
+                info (f'assigned address of {wifi.radio.ipv4_address_ap}')
+
+                server = asyncio.create_task (web_server_task (configuration, lock))
+
+                ready = True
+
+            pass
+
+        await asyncio.sleep (interval)
 
 #
 # main task
 #
 async def main ():
+    #
+    # encourage garbage collection
+    #
     gc.enable ()
 
+    #
+    # allow locking between tasks
+    #
     lock = asyncio.Lock ()
 
     #
-    # read the configuration data
+    # read the persistent configuration data
     #
     with open ('secrets.json') as file:
-        config = json.load (file)
+        configuration = json.load (file)
+
+    #
+    # add the variable configuration data
+    #
+    configuration['system'] = {
+        'hostname': 'proximity-' + binascii.hexlify (wifi.radio.mac_address, '-').decode ('utf-8'),
+        'location': None
+    }
 
     #
     # create the inputs
     #
-    for id, parameters in config['beacon'].items ():
+    for id, parameters in configuration['beacon'].items ():
         Beacon.factory (id, parameters)
 
     #
     # create the outputs
     #
-    for id, parameters in config['output'].items ():
+    for id, parameters in configuration['output'].items ():
         Output.factory (id, parameters)
 
     #
-    # find an initial access point
+    # create the set of independent tasks to run
     #
-    async with AccessPoint (config['wifi']):
-        pass
+    tasks = []
 
     #
-    # create the set of independent tasks
+    # start a task to listen for WiFi packets as inputs
     #
-    tasks = [
-        #
-        # task to listen for WiFi packets as inputs
-        #
-        asyncio.create_task (sniff (config, lock)),
-        #
-        # task to update output state on change of inputs
-        #
-        asyncio.create_task (tick (config, lock)),
-        #
-        # task to periodically resynchronize things
-        #
-        asyncio.create_task (resync (config, lock))
-    ]
+    tasks.append (asyncio.create_task (packet_sniffer_task (configuration, lock)))
+
+    #
+    # start a task to monitor beacon and timeout status
+    #
+    tasks.append (asyncio.create_task (system_monitor_task (configuration, lock)))
+
+    #
+    # start a task to periodically resynchronize the output status
+    #
+    tasks.append (asyncio.create_task (resynchronize_task (configuration, lock)))
+
+    #
+    # start a task to provide a web interface for status and configuration
+    #
+    #FIXME# tasks.append (asyncio.create_task (web_server_task (configuration, lock)))
+
+    #
+    # start a task to monitor button and set system mode
+    #
+    tasks.append (asyncio.create_task (configuration_task (configuration, lock)))
 
     #
     # wait for all of the tasks to complete
@@ -508,7 +719,7 @@ if __name__ == '__main__':
         #
         # try to show what happened
         #
-        traceback.print_exception (e)
+        logger ('\n'.join (traceback.format_exception (e)))
         time.sleep (10)
 
         #

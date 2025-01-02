@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Proximity</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/png" href="/favicon.png">
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <div class="container">
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
+
+        <li class="nav-item">
+        <a href="#" class="proximity nav-link px-2 d-flex align-items-center mb-2 mb-lg-0 link-body-emphasis text-decoration-none">
+            <img class="bi me-2" width="24" height="24" role="img" style="filter: invert(75%);" src="favicon.png">
+        </a>
+        </li>
+
+
+
+
+        <li class="nav-item"><a href="#" class="control nav-link px-2">Control</a></li>
+        <li class="nav-item"><a href="#" class="debug nav-link px-2">Debug</a></li>
+        <li class="nav-item"><a href="#" class="configure nav-link px-2">Configure</a></li>
+
+
+          </ul>
+          <ul class="navbar-nav mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a class="nav-link" aria-current="page" href="https://github.com/smcolash/proximity-wifi-circuitpython-async">About</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+
+
+
+
+    <div id="main" class="container my-5">
+
+      <div id="proximity" class="application" style="display: none;">
+        <h1>Proximity</h1>
+        <div class="col-lg-8 px-0">
+          <p class="fs-5">
+          Main page...
+          </p>
+        </div>
+      </div>
+
+      <div id="control" class="application" style="display: none;">
+        <h1>Control</h1>
+        <div class="col-lg-8 px-0">
+          <p class="fs-5">
+          Control page...
+          </p>
+        </div>
+      </div>
+
+      <div id="debug" class="application" style="display: none;">
+        <h1>Debug</h1>
+        <div class="col-lg-8 px-0">
+          <p class="fs-5">
+          Debug page...
+          </p>
+        </div>
+      </div>
+
+      <div id="configure" class="application" style="display: none;">
+        <h1>Configure</h1>
+        <div class="col-lg-8 px-0">
+          <p class="fs-5">
+          Configuration page...
+          </p>
+        </div>
+      </div>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+
+    <script src="main.js"></script>
+
+
+<script>
+
+    $(document).ready(function() {
+        $('.application').hide ();
+        $('#proximity').show ();
+    });
+
+
+    $('.nav-link').click (function () {
+        console.log (this);
+        console.log ($(this).text ());
+
+        let mapping = {
+            "Control": "control",
+            "Debug": "debug",
+            "Configure": "configure"
+        };
+
+        let index = $(this).text ();
+        console.log (index);
+
+        let target = "proximity";
+        if (index in mapping) {
+            target = mapping[index];
+        }
+
+        console.log (target);
+
+        $('.application').hide ();
+
+        $('#' + target).show ();
+    });
+
+
+
+
+</script>
+
+
+
+  </body>
+</html>
+
