@@ -39,17 +39,28 @@
   </div>
 </nav>
 
-<div id="main" class="container my-5">
+<div id="main" class="container">
 
   <div id="proximity" class="application" style="display: none;">
     <h1>Proximity</h1>
     <div class="col-lg-12 px-0">
       <p class="fs-5">
       Main page...
-      Describe whth this is and how it works.
+      Describe what this is and how it works.
       </p>
-      <p>
+      <p class="fs-5">
       Describe the part os this UI</p>
+
+
+      <ul>
+          <li>A location has one or more WiFi routers.</li>
+          <li>A beacon may move between locations.</li>
+          <li>An output may be anywhere.</li>
+      </ul>
+
+      <p>when observed to be at a [location], a [beacon] triggers the [list of outputs]</p>
+
+
     </div>
   </div>
 
@@ -135,7 +146,7 @@
 <form class="row g-3" novalidate>
 
       <div class="mb-3">
-        <label for="formFile" class="form-label">Upload existing configuration data:</label>
+        <label for="formFile" class="form-label">Upload existing configuration data.</label>
         <input class="form-control" type="file" id="formFile">
       </div>
 
@@ -188,28 +199,396 @@
 
 
       <h2>Mapping</h2>
-<pre>
-        "home": {
-            "phone": [
-                "blue LED",
-                "desk light"
-            ],
-            "laptop": [
-                "blue LED",
-                "desk light"
-            ]
-        },
-        "work": {
-            "phone": [
-                "blue LED",
-                "room lights"
-            ],
-            "laptop": [
-                "blue LED",
-                "room lights"
-            ]
-        }
-</pre>
+
+<div class="input-group">
+  <div class="input-group-text">
+    <input class="form-check-input mt-0" type="checkbox" value="" checked aria-label="Checkbox for following text input">
+  </div>
+
+
+  <input type="text" class="form-control" value="home" aria-label="location">
+  <button class="btn btn-outline-secondary" type="button" id="add-location">
+    <img src="file-earmark-check.svg">
+  </button>
+  <button class="btn btn-outline-secondary" type="button" id="add-location">
+    <img src="trash3.svg">
+  </button>
+</div>
+
+
+<div class="input-group">
+  <span class="input-group-text" id="inputGroup-sizing-default">Beacon</span>
+
+  <div class="input-group-text">
+    <input class="form-check-input mt-0" type="checkbox" value="" checked aria-label="Checkbox for following text input">
+  </div>
+
+
+
+    <select class="form-select" id="validationCustom04" required>
+      <option selected disabled value="">beacon...</option>
+      <option selected>iphone</option>
+      <option>laptop</option>
+    </select>
+
+
+
+  <button class="btn btn-outline-secondary" type="button" id="add-location">
+    <img src="file-earmark-check.svg">
+  </button>
+  <button class="btn btn-outline-secondary" type="button" id="add-location">
+    <img src="trash3.svg">
+  </button>
+
+
+</div>
+
+
+<div class="input-group">
+  <span class="input-group-text" id="inputGroup-sizing-default">Output</span>
+
+  <div class="input-group-text">
+    <input class="form-check-input mt-0" type="checkbox" value="" checked aria-label="Checkbox for following text input">
+  </div>
+
+
+
+
+    <select class="form-select" id="validationCustom04" required>
+      <option selected disabled value="">output...</option>
+      <option selected>blue LED</option>
+      <option>desk light</option>
+    </select>
+
+
+
+  <button class="btn btn-outline-secondary" type="button" id="add-location">
+    <img src="file-earmark-check.svg">
+  </button>
+  <button class="btn btn-outline-secondary" type="button" id="add-location">
+    <img src="trash3.svg">
+  </button>
+
+
+</div>
+
+
+<div class="input-group">
+  <span class="input-group-text" id="inputGroup-sizing-default">Output</span>
+
+  <div class="input-group-text">
+    <input class="form-check-input mt-0" type="checkbox" value="" checked aria-label="Checkbox for following text input">
+  </div>
+
+
+
+
+    <select class="form-select" id="validationCustom04" required>
+      <option selected disabled value="">output...</option>
+      <option>blue LED</option>
+      <option selected>desk light</option>
+    </select>
+
+
+
+  <button class="btn btn-outline-secondary" type="button" id="add-location">
+    <img src="file-earmark-check.svg">
+  </button>
+  <button class="btn btn-outline-secondary" type="button" id="add-location">
+    <img src="trash3.svg">
+  </button>
+
+
+</div>
+
+<div class="input-group">
+  <span class="input-group-text" id="inputGroup-sizing-default">Beacon</span>
+
+  <div class="input-group-text">
+    <input class="form-check-input mt-0" type="checkbox" value="" checked aria-label="Checkbox for following text input">
+  </div>
+
+
+
+
+    <select class="form-select" id="validationCustom04" required>
+      <option selected disabled value="">beacon...</option>
+      <option>iphone</option>
+      <option selected>laptop</option>
+    </select>
+
+
+
+  <button class="btn btn-outline-secondary" type="button" id="add-location">
+    <img src="file-earmark-check.svg">
+  </button>
+  <button class="btn btn-outline-secondary" type="button" id="add-location">
+    <img src="trash3.svg">
+  </button>
+
+
+</div>
+
+<div class="input-group">
+  <span class="input-group-text" id="inputGroup-sizing-default">Output</span>
+
+  <div class="input-group-text">
+    <input class="form-check-input mt-0" type="checkbox" value="" checked aria-label="Checkbox for following text input">
+  </div>
+
+
+
+
+    <select class="form-select" id="validationCustom04" required>
+      <option selected disabled value="">output...</option>
+      <option selected>blue LED</option>
+      <option>desk light</option>
+    </select>
+
+
+
+  <button class="btn btn-outline-secondary" type="button" id="add-location">
+    <img src="file-earmark-check.svg">
+  </button>
+  <button class="btn btn-outline-secondary" type="button" id="add-location">
+    <img src="trash3.svg">
+  </button>
+
+
+</div>
+
+
+
+
+
+<div class="input-group">
+  <span class="input-group-text" id="inputGroup-sizing-default">Output</span>
+
+  <div class="input-group-text">
+    <input class="form-check-input mt-0" type="checkbox" value="" checked aria-label="Checkbox for following text input">
+  </div>
+
+
+
+
+    <select class="form-select" id="validationCustom04" required>
+      <option selected disabled value="">output...</option>
+      <option>blue LED</option>
+      <option selected>desk light</option>
+    </select>
+
+
+
+  <button class="btn btn-outline-secondary" type="button" id="add-location">
+    <img src="file-earmark-check.svg">
+  </button>
+  <button class="btn btn-outline-secondary" type="button" id="add-location">
+    <img src="trash3.svg">
+  </button>
+
+
+</div>
+
+
+
+
+
+
+<div class="input-group">
+
+  <div class="input-group-text">
+    <input class="form-check-input mt-0" type="checkbox" value="" checked aria-label="Checkbox for following text input">
+  </div>
+
+
+  <input type="text" class="form-control" value="work" aria-label="location">
+  <button class="btn btn-outline-secondary" type="button" id="add-location">
+    <img src="file-earmark-check.svg">
+  </button>
+  <button class="btn btn-outline-secondary" type="button" id="add-location">
+    <img src="trash3.svg">
+  </button>
+</div>
+
+
+<div class="input-group">
+  <span class="input-group-text" id="inputGroup-sizing-default">Beacon</span>
+
+
+  <div class="input-group-text">
+    <input class="form-check-input mt-0" type="checkbox" value="" checked aria-label="Checkbox for following text input">
+  </div>
+
+
+
+    <select class="form-select" id="validationCustom04" required>
+      <option selected disabled value="">beacon...</option>
+      <option selected>iphone</option>
+      <option>laptop</option>
+    </select>
+
+
+
+  <button class="btn btn-outline-secondary" type="button" id="add-location">
+    <img src="file-earmark-check.svg">
+  </button>
+  <button class="btn btn-outline-secondary" type="button" id="add-location">
+    <img src="trash3.svg">
+  </button>
+
+
+</div>
+
+
+<div class="input-group">
+  <span class="input-group-text" id="inputGroup-sizing-default">Output</span>
+
+  <div class="input-group-text">
+    <input class="form-check-input mt-0" type="checkbox" value="" checked aria-label="Checkbox for following text input">
+  </div>
+
+
+
+
+    <select class="form-select" id="validationCustom04" required>
+      <option selected disabled value="">output...</option>
+      <option selected>blue LED</option>
+      <option>room lights</option>
+    </select>
+
+
+
+  <button class="btn btn-outline-secondary" type="button" id="add-location">
+    <img src="file-earmark-check.svg">
+  </button>
+  <button class="btn btn-outline-secondary" type="button" id="add-location">
+    <img src="trash3.svg">
+  </button>
+
+
+</div>
+
+
+<div class="input-group">
+  <span class="input-group-text" id="inputGroup-sizing-default">Output</span>
+
+  <div class="input-group-text">
+    <input class="form-check-input mt-0" type="checkbox" value="" checked aria-label="Checkbox for following text input">
+  </div>
+
+
+
+
+    <select class="form-select" id="validationCustom04" required>
+      <option selected disabled value="">output...</option>
+      <option>blue LED</option>
+      <option selected>room lights</option>
+    </select>
+
+
+
+  <button class="btn btn-outline-secondary" type="button" id="add-location">
+    <img src="file-earmark-check.svg">
+  </button>
+  <button class="btn btn-outline-secondary" type="button" id="add-location">
+    <img src="trash3.svg">
+  </button>
+
+
+</div>
+
+<div class="input-group">
+  <span class="input-group-text" id="inputGroup-sizing-default">Beacon</span>
+
+
+  <div class="input-group-text">
+    <input class="form-check-input mt-0" type="checkbox" value="" checked aria-label="Checkbox for following text input">
+  </div>
+
+
+
+    <select class="form-select" id="validationCustom04" required>
+      <option selected disabled value="">beacon...</option>
+      <option>iphone</option>
+      <option selected>laptop</option>
+    </select>
+
+
+
+  <button class="btn btn-outline-secondary" type="button" id="add-location">
+    <img src="file-earmark-check.svg">
+  </button>
+  <button class="btn btn-outline-secondary" type="button" id="add-location">
+    <img src="trash3.svg">
+  </button>
+
+
+</div>
+
+<div class="input-group">
+  <span class="input-group-text" id="inputGroup-sizing-default">Output</span>
+
+
+  <div class="input-group-text">
+    <input class="form-check-input mt-0" type="checkbox" value="" checked aria-label="Checkbox for following text input">
+  </div>
+
+
+
+    <select class="form-select" id="validationCustom04" required>
+      <option selected disabled value="">output...</option>
+      <option selected>blue LED</option>
+      <option>room lights</option>
+    </select>
+
+
+
+  <button class="btn btn-outline-secondary" type="button" id="add-location">
+    <img src="file-earmark-check.svg">
+  </button>
+  <button class="btn btn-outline-secondary" type="button" id="add-location">
+    <img src="trash3.svg">
+  </button>
+
+
+</div>
+
+
+
+
+
+<div class="input-group">
+  <span class="input-group-text" id="inputGroup-sizing-default">Output</span>
+
+  <div class="input-group-text">
+    <input class="form-check-input mt-0" type="checkbox" value="" checked aria-label="Checkbox for following text input">
+  </div>
+
+
+
+
+    <select class="form-select" id="validationCustom04" required>
+      <option selected disabled value="">output...</option>
+      <option>blue LED</option>
+      <option selected>room lights</option>
+    </select>
+
+
+
+  <button class="btn btn-outline-secondary" type="button" id="add-location">
+    <img src="file-earmark-check.svg">
+  </button>
+  <button class="btn btn-outline-secondary" type="button" id="add-location">
+    <img src="trash3.svg">
+  </button>
+
+
+</div>
+
+
+
+
+
 
 
 
@@ -218,7 +597,7 @@
 
 <div class="input-group">
   <input type="text" class="form-control" placeholder="network ssid" aria-label="network ssid">
-  <input type="text" class="form-control" placeholder="password" aria-label="password">
+  <input type="password" class="form-control" placeholder="password" aria-label="password">
     <select class="form-select" id="validationCustom04" required>
       <option selected disabled value="">location...</option>
       <option>home</option>
@@ -234,12 +613,8 @@
 
 
 <div class="input-group">
-  <div class="input-group-text">
-    <input class="form-check-input mt-0" type="checkbox" value="" checked aria-label="Checkbox for following text input">
-  </div>
-
   <input type="text" class="form-control" placeholder="ssid1" aria-label="network ssid">
-  <input type="text" class="form-control" placeholder="password1" aria-label="password">
+  <input type="password" class="form-control" value="password1" aria-label="password">
 
 
   <button class="btn btn-outline-secondary" type="button" id="add-location">
@@ -252,12 +627,8 @@
 
 
 <div class="input-group">
-  <div class="input-group-text">
-    <input class="form-check-input mt-0" type="checkbox" value="" checked aria-label="Checkbox for following text input">
-  </div>
-
   <input type="text" class="form-control" placeholder="ssid2" aria-label="network ssid">
-  <input type="text" class="form-control" placeholder="password2" aria-label="password">
+  <input type="password" class="form-control" value="password2" aria-label="password">
 
   <button class="btn btn-outline-secondary" type="button" id="add-location">
     <img src="file-earmark-check.svg">
@@ -275,50 +646,15 @@
 
 
       <h2>Beacons</h2>
-
-<div class="input-group">
-  <input type="text" class="form-control" placeholder="beacon macid" aria-label="beacon macid">
-  <input type="text" class="form-control" placeholder="name" aria-label="name">
-  <button class="btn btn-outline-secondary" type="button" id="add-location">
-      <img src="file-earmark-plus.svg">
-  </button>
-</div>
-
-
-<div class="input-group">
-  <div class="input-group-text">
-    <input class="form-check-input mt-0" type="checkbox" value="" checked aria-label="Checkbox for following text input">
-  </div>
-  <input type="text" class="form-control" value="aa:aa:aa:aa:aa" aria-label="beacon macid">
-  <input type="text" class="form-control" value="iphone" aria-label="name">
-  <button class="btn btn-outline-secondary" type="button" id="add-location">
-    <img src="file-earmark-check.svg">
-  </button>
-  <button class="btn btn-outline-secondary" type="button" id="add-location">
-    <img src="trash3.svg">
-  </button>
-</div>
-
-
-<div class="input-group">
-  <div class="input-group-text">
-    <input class="form-check-input mt-0" type="checkbox" value="" checked aria-label="Checkbox for following text input">
-  </div>
-  <input type="text" class="form-control" value="bb:bb:bb:bb:bb" aria-label="beacon macid">
-  <input type="text" class="form-control" value="laptop" aria-label="name">
-  <button class="btn btn-outline-secondary" type="button" id="add-location">
-    <img src="file-earmark-check.svg">
-  </button>
-  <button class="btn btn-outline-secondary" type="button" id="add-location">
-    <img src="trash3.svg">
-  </button>
-</div>
-
-
-
-
-
-
+      <div class="col-lg-12" id="configure-beacons">
+        <div class="input-group mb-3">
+          <input type="text" class="form-control" placeholder="beacon name">
+          <input type="text" class="form-control" placeholder="beacon macid">
+          <button class="btn btn-outline-secondary proximity-add-beacon" type="button">
+            <img src="file-earmark-plus.svg">
+          </button>
+        </div>
+      </div>
 
 
 
@@ -376,9 +712,6 @@
 
 
 <div class="input-group">
-  <div class="input-group-text">
-    <input class="form-check-input mt-0" type="checkbox" value="" checked aria-label="Checkbox for following text input">
-  </div>
   <input type="text" class="form-control" value="blue led" aria-label="beacon macid">
 
     <select class="form-select" id="validationCustom04" required>
@@ -404,9 +737,6 @@
 
 
 <div class="input-group">
-  <div class="input-group-text">
-    <input class="form-check-input mt-0" type="checkbox" value="" checked aria-label="Checkbox for following text input">
-  </div>
   <input type="text" class="form-control" value="desk light" aria-label="beacon macid">
 
     <select class="form-select" id="validationCustom04" required>
@@ -421,7 +751,6 @@
   <input type="text" class="form-control" value="********************" aria-label="beacon macid">
   <input type="text" class="form-control" value="********************" aria-label="beacon macid">
   <input type="text" class="form-control" value="********************" aria-label="beacon macid">
-  <input type="text" class="form-control" value="https://openapi.tuyaus.com" aria-label="beacon macid">
 
 
   <input type="text" class="form-control" value="switch_1" aria-label="beacon macid">
@@ -440,9 +769,6 @@
 
 
 <div class="input-group">
-  <div class="input-group-text">
-    <input class="form-check-input mt-0" type="checkbox" value="" checked aria-label="Checkbox for following text input">
-  </div>
   <input type="text" class="form-control" value="accent lights" aria-label="beacon macid">
 
     <select class="form-select" id="validationCustom04" required>
@@ -457,7 +783,6 @@
   <input type="text" class="form-control" value="********************" aria-label="beacon macid">
   <input type="text" class="form-control" value="********************" aria-label="beacon macid">
   <input type="text" class="form-control" value="********************" aria-label="beacon macid">
-  <input type="text" class="form-control" value="https://openapi.tuyaus.com" aria-label="beacon macid">
 
 
   <input type="text" class="form-control" value="switch_1" aria-label="beacon macid">

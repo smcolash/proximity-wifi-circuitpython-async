@@ -24,12 +24,10 @@ div.list div:before {
 
     background-color: var(--bs-dark-bg-subtle) !important;
 
-    border-right: 2px solid black;
+    border-right: 2px solid gray;
 
 }
 
-.input-group li {
-    margin-left: 8px;
-    flex: 1 1 auto;
+.proximity-beacon-label {
+    width: 10rem;
 }
-
