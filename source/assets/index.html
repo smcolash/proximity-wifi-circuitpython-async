@@ -187,6 +187,31 @@
 
 
 
+      <h2>Mapping</h2>
+<pre>
+        "home": {
+            "phone": [
+                "blue LED",
+                "desk light"
+            ],
+            "laptop": [
+                "blue LED",
+                "desk light"
+            ]
+        },
+        "work": {
+            "phone": [
+                "blue LED",
+                "room lights"
+            ],
+            "laptop": [
+                "blue LED",
+                "room lights"
+            ]
+        }
+</pre>
+
+
 
 
       <h2>WiFi</h2>
@@ -280,7 +305,7 @@
     <input class="form-check-input mt-0" type="checkbox" value="" checked aria-label="Checkbox for following text input">
   </div>
   <input type="text" class="form-control" value="bb:bb:bb:bb:bb" aria-label="beacon macid">
-  <input type="text" class="form-control" value="iphone" aria-label="name">
+  <input type="text" class="form-control" value="laptop" aria-label="name">
   <button class="btn btn-outline-secondary" type="button" id="add-location">
     <img src="file-earmark-check.svg">
   </button>
@@ -303,60 +328,149 @@
 
       <h2>Outputs</h2>
 
-<pre>
-        "blue LED": {
-            "enabled": true,
-            "name": "LED",
-            "pin": "D2",
-            "timeout": 1800,
-            "type": "led"
-        },
-        "desk light": {
-            "client_id": "********************",
-            "client_secret": "********************************",
-            "device_id": "**********************",
-            "enabled": true,
-            "name": "switch_1",
-            "server": "https://openapi.tuyaus.com",
-            "timeout": 1800,
-            "type": "tuya"
-        },
-        "room lights": {
-            "client_id": "********************",
-            "client_secret": "********************************",
-            "device_id": "********************",
-            "enabled": true,
-            "name": "switch_1",
-            "server": "https://openapi.tuyaus.com",
-            "timeout": 1800,
-            "type": "tuya"
-        }
-</pre>
 
 
-      <h2>Mapping</h2>
-<pre>
-        "home": {
-            "phone": [
-                "blue LED",
-                "desk light"
-            ],
-            "laptop": [
-                "blue LED",
-                "desk light"
-            ]
-        },
-        "work": {
-            "phone": [
-                "blue LED",
-                "room lights"
-            ],
-            "laptop": [
-                "blue LED",
-                "room lights"
-            ]
-        }
-</pre>
+<div class="input-group">
+  <input type="text" class="form-control" placeholder="label" aria-label="beacon macid">
+
+    <select class="form-select" id="validationCustom04" required>
+      <option selected disabled value="">type...</option>
+      <option>GPIO</option>
+      <option>LED</option>
+      <option>Tuya API</option>
+    </select>
+
+  <input type="text" class="form-control" placeholder="name" aria-label="beacon macid">
+  <input type="text" class="form-control" placeholder="timeout" aria-label="beacon macid">
+
+  <button class="btn btn-outline-secondary" type="button" id="add-location">
+      <img src="file-earmark-plus.svg">
+  </button>
+</div>
+
+
+
+<div class="input-group">
+  <input type="text" class="form-control" placeholder="label" aria-label="beacon macid">
+
+    <select class="form-select" id="validationCustom04" required>
+      <option selected disabled value="">type...</option>
+      <option>GPIO</option>
+      <option>LED</option>
+      <option>Tuya API</option>
+    </select>
+
+  <input type="text" class="form-control" placeholder="client_id" aria-label="beacon macid">
+  <input type="text" class="form-control" placeholder="client_secret" aria-label="beacon macid">
+  <input type="text" class="form-control" placeholder="device_id" aria-label="beacon macid">
+  <input type="text" class="form-control" placeholder="server" aria-label="beacon macid">
+
+  <input type="text" class="form-control" placeholder="name" aria-label="beacon macid">
+  <input type="text" class="form-control" placeholder="timeout" aria-label="beacon macid">
+
+  <button class="btn btn-outline-secondary" type="button" id="add-location">
+      <img src="file-earmark-plus.svg">
+  </button>
+</div>
+
+
+
+<div class="input-group">
+  <div class="input-group-text">
+    <input class="form-check-input mt-0" type="checkbox" value="" checked aria-label="Checkbox for following text input">
+  </div>
+  <input type="text" class="form-control" value="blue led" aria-label="beacon macid">
+
+    <select class="form-select" id="validationCustom04" required>
+      <option selected disabled value="">type...</option>
+      <option>GPIO</option>
+      <option selected>LED</option>
+      <option>Tuya API</option>
+    </select>
+
+  <input type="text" class="form-control" value="LED" aria-label="beacon macid">
+  <input type="text" class="form-control" value="1800" aria-label="beacon macid">
+
+  <button class="btn btn-outline-secondary" type="button" id="add-location">
+    <img src="file-earmark-check.svg">
+  </button>
+  <button class="btn btn-outline-secondary" type="button" id="add-location">
+    <img src="trash3.svg">
+  </button>
+</div>
+
+
+
+
+
+<div class="input-group">
+  <div class="input-group-text">
+    <input class="form-check-input mt-0" type="checkbox" value="" checked aria-label="Checkbox for following text input">
+  </div>
+  <input type="text" class="form-control" value="desk light" aria-label="beacon macid">
+
+    <select class="form-select" id="validationCustom04" required>
+      <option selected disabled value="">type...</option>
+      <option>GPIO</option>
+      <option>LED</option>
+      <option selected>Tuya API</option>
+    </select>
+
+
+
+  <input type="text" class="form-control" value="********************" aria-label="beacon macid">
+  <input type="text" class="form-control" value="********************" aria-label="beacon macid">
+  <input type="text" class="form-control" value="********************" aria-label="beacon macid">
+  <input type="text" class="form-control" value="https://openapi.tuyaus.com" aria-label="beacon macid">
+
+
+  <input type="text" class="form-control" value="switch_1" aria-label="beacon macid">
+  <input type="text" class="form-control" value="1800" aria-label="beacon macid">
+
+  <button class="btn btn-outline-secondary" type="button" id="add-location">
+    <img src="file-earmark-check.svg">
+  </button>
+  <button class="btn btn-outline-secondary" type="button" id="add-location">
+    <img src="trash3.svg">
+  </button>
+</div>
+
+
+
+
+
+<div class="input-group">
+  <div class="input-group-text">
+    <input class="form-check-input mt-0" type="checkbox" value="" checked aria-label="Checkbox for following text input">
+  </div>
+  <input type="text" class="form-control" value="accent lights" aria-label="beacon macid">
+
+    <select class="form-select" id="validationCustom04" required>
+      <option selected disabled value="">type...</option>
+      <option>GPIO</option>
+      <option>LED</option>
+      <option selected>Tuya API</option>
+    </select>
+
+
+
+  <input type="text" class="form-control" value="********************" aria-label="beacon macid">
+  <input type="text" class="form-control" value="********************" aria-label="beacon macid">
+  <input type="text" class="form-control" value="********************" aria-label="beacon macid">
+  <input type="text" class="form-control" value="https://openapi.tuyaus.com" aria-label="beacon macid">
+
+
+  <input type="text" class="form-control" value="switch_1" aria-label="beacon macid">
+  <input type="text" class="form-control" value="1800" aria-label="beacon macid">
+
+  <button class="btn btn-outline-secondary" type="button" id="add-location">
+    <img src="file-earmark-check.svg">
+  </button>
+  <button class="btn btn-outline-secondary" type="button" id="add-location">
+    <img src="trash3.svg">
+  </button>
+</div>
+
 
 
 </form>
