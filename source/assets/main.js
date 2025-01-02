@@ -3,8 +3,7 @@
 //
 $(document).ready(function() {
     $('.application').hide ();
-    //$('#proximity').show ();
-    $('#debug').show ();
+    $('#proximity').show ();
 });
 
 //
