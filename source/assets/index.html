@@ -132,33 +132,237 @@
   <div id="configure" class="application" style="display: none;">
     <h1>Configure</h1>
     <div class="col-lg-12 px-0">
-      <p class="fs-5">
-      Configuration page...
+<form class="row g-3" novalidate>
+
+      <div class="mb-3">
+        <label for="formFile" class="form-label">Upload existing configuration data:</label>
+        <input class="form-control" type="file" id="formFile">
+      </div>
+
+
+
+  <div class="col-12">
+    <button type="button" class="btn btn-primary">Save Changes</button>
+    <button type="button" class="btn btn-secondary float-end">Download JSON</button>
+  </div>
+
+
 
       <h2>Locations</h2>
-      <p>asdf</p>
+
+<div class="input-group">
+  <input type="text" class="form-control" placeholder="location name" aria-label="location name" aria-describedby="add-location">
+  <button class="btn btn-outline-secondary" type="button" id="add-location">
+      <img src="file-earmark-plus.svg">
+  </button>
+</div>
+
+
+
+
+<div class="input-group">
+  <input type="text" class="form-control" value="home" aria-label="location">
+  <button class="btn btn-outline-secondary" type="button" id="add-location">
+    <img src="file-earmark-check.svg">
+  </button>
+  <button class="btn btn-outline-secondary" type="button" id="add-location">
+    <img src="trash3.svg">
+  </button>
+</div>
+
+
+
+
+
+<div class="input-group">
+  <input type="text" class="form-control" value="work" aria-label="location">
+  <button class="btn btn-outline-secondary" type="button" id="add-location">
+    <img src="file-earmark-check.svg">
+  </button>
+  <button class="btn btn-outline-secondary" type="button" id="add-location">
+    <img src="trash3.svg">
+  </button>
+</div>
+
+
+
+
+
 
       <h2>WiFi</h2>
-      <p>asdf</p>
+
+<div class="input-group">
+  <input type="text" class="form-control" placeholder="network ssid" aria-label="network ssid">
+  <input type="text" class="form-control" placeholder="password" aria-label="password">
+    <select class="form-select" id="validationCustom04" required>
+      <option selected disabled value="">location...</option>
+      <option>home</option>
+      <option>work</option>
+    </select>
+  <button class="btn btn-outline-secondary" type="button" id="add-location">
+      <img src="file-earmark-plus.svg">
+  </button>
+</div>
+
+
+
+
+
+<div class="input-group">
+  <div class="input-group-text">
+    <input class="form-check-input mt-0" type="checkbox" value="" checked aria-label="Checkbox for following text input">
+  </div>
+
+  <input type="text" class="form-control" placeholder="ssid1" aria-label="network ssid">
+  <input type="text" class="form-control" placeholder="password1" aria-label="password">
+
+
+  <button class="btn btn-outline-secondary" type="button" id="add-location">
+    <img src="file-earmark-check.svg">
+  </button>
+  <button class="btn btn-outline-secondary" type="button" id="add-location">
+    <img src="trash3.svg">
+  </button>
+</div>
+
+
+<div class="input-group">
+  <div class="input-group-text">
+    <input class="form-check-input mt-0" type="checkbox" value="" checked aria-label="Checkbox for following text input">
+  </div>
+
+  <input type="text" class="form-control" placeholder="ssid2" aria-label="network ssid">
+  <input type="text" class="form-control" placeholder="password2" aria-label="password">
+
+  <button class="btn btn-outline-secondary" type="button" id="add-location">
+    <img src="file-earmark-check.svg">
+  </button>
+
+  <button class="btn btn-outline-secondary" type="button" id="add-location">
+    <img src="trash3.svg">
+  </button>
+</div>
+
+
+
+
+
+
 
       <h2>Beacons</h2>
-      <p>asdf</p>
+
+<div class="input-group">
+  <input type="text" class="form-control" placeholder="beacon macid" aria-label="beacon macid">
+  <input type="text" class="form-control" placeholder="name" aria-label="name">
+  <button class="btn btn-outline-secondary" type="button" id="add-location">
+      <img src="file-earmark-plus.svg">
+  </button>
+</div>
+
+
+<div class="input-group">
+  <div class="input-group-text">
+    <input class="form-check-input mt-0" type="checkbox" value="" checked aria-label="Checkbox for following text input">
+  </div>
+  <input type="text" class="form-control" value="aa:aa:aa:aa:aa" aria-label="beacon macid">
+  <input type="text" class="form-control" value="iphone" aria-label="name">
+  <button class="btn btn-outline-secondary" type="button" id="add-location">
+    <img src="file-earmark-check.svg">
+  </button>
+  <button class="btn btn-outline-secondary" type="button" id="add-location">
+    <img src="trash3.svg">
+  </button>
+</div>
+
+
+<div class="input-group">
+  <div class="input-group-text">
+    <input class="form-check-input mt-0" type="checkbox" value="" checked aria-label="Checkbox for following text input">
+  </div>
+  <input type="text" class="form-control" value="bb:bb:bb:bb:bb" aria-label="beacon macid">
+  <input type="text" class="form-control" value="iphone" aria-label="name">
+  <button class="btn btn-outline-secondary" type="button" id="add-location">
+    <img src="file-earmark-check.svg">
+  </button>
+  <button class="btn btn-outline-secondary" type="button" id="add-location">
+    <img src="trash3.svg">
+  </button>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
 
       <h2>Outputs</h2>
-      <p>asdf</p>
+
+<pre>
+        "blue LED": {
+            "enabled": true,
+            "name": "LED",
+            "pin": "D2",
+            "timeout": 1800,
+            "type": "led"
+        },
+        "desk light": {
+            "client_id": "********************",
+            "client_secret": "********************************",
+            "device_id": "**********************",
+            "enabled": true,
+            "name": "switch_1",
+            "server": "https://openapi.tuyaus.com",
+            "timeout": 1800,
+            "type": "tuya"
+        },
+        "room lights": {
+            "client_id": "********************",
+            "client_secret": "********************************",
+            "device_id": "********************",
+            "enabled": true,
+            "name": "switch_1",
+            "server": "https://openapi.tuyaus.com",
+            "timeout": 1800,
+            "type": "tuya"
+        }
+</pre>
+
 
       <h2>Mapping</h2>
-      <p>asdf</p>
+<pre>
+        "home": {
+            "phone": [
+                "blue LED",
+                "desk light"
+            ],
+            "laptop": [
+                "blue LED",
+                "desk light"
+            ]
+        },
+        "work": {
+            "phone": [
+                "blue LED",
+                "room lights"
+            ],
+            "laptop": [
+                "blue LED",
+                "room lights"
+            ]
+        }
+</pre>
+
+
+</form>
 
 
 
-<button type="button" class="btn btn-primary">Save</button>
-<button type="button" class="btn btn-secondary">Download</button>
-<button type="button" class="btn btn-secondary">Upload</button>
-
-
-
-      </p>
     </div>
   </div>
 
