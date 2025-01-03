@@ -217,9 +217,13 @@ $(document).ready(function() {
     //
     // get the configuration data
     //
-    $.getJSON ('/api/v1/config')
+    $.getJSON ('secrets.json')
         .done (function (data) {
+
             process_configuration (data);
+
+
+
         })
         .fail (function () {
             console.log ('fail...');

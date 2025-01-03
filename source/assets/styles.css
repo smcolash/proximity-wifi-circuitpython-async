@@ -29,12 +29,12 @@ div.list div:before {
 }
 
 .proximity-config-label {
-    flex: 0 0 10rem !important;
+    flex: 0 0 8rem !important;
 }
 
 
 .proximity-beacon-label {
-    flex: 0 0 10rem !important;
+    flex: 0 0 8rem !important;
 }
 
 
