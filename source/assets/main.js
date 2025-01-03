@@ -209,8 +209,8 @@ $(document).ready(function() {
     // show the initial page
     //
     $('.application').hide ();
-    //proximity').show ();
-    $('#configure').show ();
+    proximity').show ();
+    //$('#configure').show ();
 
 
 
