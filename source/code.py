@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import adafruit_hashlib as hashlib
-#FIXME# import adafruit_httpserver as httpserver
 import adafruit_ntp
 import adafruit_requests as requests
 import circuitpython_hmac as hmac
@@ -14,12 +13,15 @@ import gc
 import json
 import mdns
 import microcontroller
+import os
 import socketpool
 import ssl
 import sys
 import time
 import traceback
 import wifi
+
+import biplane
 
 # ------------------------------------------------------------
 
@@ -450,12 +452,113 @@ async def packet_sniffer_task (configuration, lock):
 
         info ('stopped packet analysis')
 
+class BaseResponse (biplane.Response):
+    def __init__(self, status_code=200, content_type="text/plain", headers={}):
+        self.status_code = status_code
+        self.headers = headers
+        self.headers["content-type"] = content_type
+
+    def serialize(self):
+        response = bytearray(f"HTTP/1.1 {self.status_code} {self.status_code}\r\n".encode("ascii"))
+        yield response
+
+        for name, value in self.headers.items():
+            yield f"{name}: {value}\r\n".encode("ascii")
+
+        yield b"\r\n"
+
+class FileResponse (BaseResponse):
+    def __init__(self, path, status_code=200, content_type="text/plain", headers={}):
+        super ().__init__ (status_code, content_type, headers)
+
+        self.path = path
+        self.length = os.stat (self.path)[6]
+        self.headers["content-length"] = self.length
+
+    def serialize(self):
+        yield from super ().serialize ()
+
+        with open (self.path, 'rb') as file:
+            while True:
+                buffer = file.read (256)
+                if not buffer:
+                    break
+                yield buffer
+       
+class JSONResponse (BaseResponse):
+    def __init__(self, data, status_code=200, content_type="application/json", headers={}):
+        super ().__init__ (status_code, content_type, headers)
+
+        self.data = json.dumps (data)
+        self.length = len (self.data)
+        self.headers["content-length"] = self.length
+
+    def serialize(self):
+        yield from super ().serialize ()
+
+        yield self.data
+
 #
 # task to provide a web interface for status and configuration
 #
 async def web_server_task (configuration, lock):
+
+    server = biplane.Server ()
+
+    @server.route ('/', 'GET')
+    def handler (query_parameters, headers, body):
+        return FileResponse ('assets/index.html', content_type='text/html')
+
+    @server.route ('/styles.css', 'GET')
+    def handler (query_parameters, headers, body):
+        return FileResponse ('assets/styles.css', content_type='text/css')
+
+    @server.route ('/favicon.png', 'GET')
+    def handler (query_parameters, headers, body):
+        return FileResponse ('assets/favicon.png', content_type='image/png')
+
+    @server.route ('/file-earmark-plus.svg', 'GET')
+    def handler (query_parameters, headers, body):
+        return FileResponse ('assets/file-earmark-plus.svg', content_type='image/svg+xml')
+
+    @server.route ('/file-earmark-check.svg', 'GET')
+    def handler (query_parameters, headers, body):
+        return FileResponse ('assets/file-earmark-check.svg', content_type='image/svg+xml')
+
+    @server.route ('/main.js', 'GET')
+    def handler (query_parameters, headers, body):
+        return FileResponse ('assets/main.js', content_type='text/javascript')
+
+    @server.route ('/trash3.svg', 'GET')
+    def handler (query_parameters, headers, body):
+        return FileResponse ('assets/trash3.svg', content_type='image/svg+xml')
+
+    @server.route ('/secrets.json', 'GET')
+    def handler (query_parameters, headers, body):
+        return FileResponse ('assets/secrets.json', content_type='image/svg+xml')
+
+
+    @server.route ('/api/v1/config', 'GET')
+    def handler (query_parameters, headers, body):
+        return JSONResponse (configuration)
+
+
+
+    pool = socketpool.SocketPool (wifi.radio)
+    with pool.socket () as socket:
+        for _ in server.start (socket, listen_on=('0.0.0.0', 80), max_parallel_connections=1):
+            await asyncio.sleep (0)
+
+
+
+
+
+
+
+
+    '''
     fixme ('D1')
-    import adafruit_httpserver as httpserver
+    #import adafruit_httpserver as httpserver
 
     fixme ('D2')
     pool = socketpool.SocketPool (wifi.radio)
@@ -514,6 +617,7 @@ async def web_server_task (configuration, lock):
 
         except Exception as e:
             logger ('\n'.join (traceback.format_exception (e)))
+    '''
 
 #
 # task to monitor button and set system mode
@@ -530,13 +634,23 @@ async def configuration_task (configuration, lock):
 
     info (f'using MDNS name of {configuration["system"]["hostname"]}.local')
 
+    #
+    # default to station mode
+    #
     station = True
     ready = False
 
+    #
+    # revert to AP mode if there is no WiFi configuration
+    #
+    if 'wifi' not in configuration:
+        station = False
+
+    if len (configuration['wifi']) == 0:
+        station = False
+
     interval = 0.25
     count = 0
-
-    server = None
 
     while True:
         if button.value == False:
@@ -555,16 +669,8 @@ async def configuration_task (configuration, lock):
 
             if not ready:
                 info ('starting station (client) mode')
-
-                if server is not None:
-                    server.cancel ()
-
-                try:
-                    del httpserver
-                except:
-                    pass
-
                 wifi.radio.stop_ap ()
+                await asyncio.sleep (0)
 
                 #
                 # scan for currently available networks
@@ -596,8 +702,8 @@ async def configuration_task (configuration, lock):
                         info (f'assigned address of {wifi.radio.ipv4_address}')
                         ready = True
                         break
-                    except:
-                        pass
+                    except Exception as e:
+                        logger ('\n'.join (traceback.format_exception (e)))
 
                 #
                 # wait and try again if not connected
@@ -611,14 +717,12 @@ async def configuration_task (configuration, lock):
             if not ready:
                 info ('starting access point (server) mode')
                 wifi.radio.stop_station ()
-
-                import adafruit_httpserver as httpserver
+                await asyncio.sleep (0)
 
                 wifi.radio.start_ap (configuration['system']['hostname'])
                 await asyncio.sleep (0)
-                info (f'assigned address of {wifi.radio.ipv4_address_ap}')
 
-                server = asyncio.create_task (web_server_task (configuration, lock))
+                info (f'assigned address of {wifi.radio.ipv4_address_ap}')
 
                 ready = True
 
@@ -689,7 +793,7 @@ async def main ():
     #
     # start a task to provide a web interface for status and configuration
     #
-    #FIXME# tasks.append (asyncio.create_task (web_server_task (configuration, lock)))
+    tasks.append (asyncio.create_task (web_server_task (configuration, lock)))
 
     #
     # start a task to monitor button and set system mode

@@ -28,6 +28,16 @@ div.list div:before {
 
 }
 
-.proximity-beacon-label {
-    width: 10rem;
+.proximity-config-label {
+    flex: 0 0 10rem !important;
 }
+
+
+.proximity-beacon-label {
+    flex: 0 0 10rem !important;
+}
+
+
+
+
+

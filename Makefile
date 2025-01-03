@@ -12,13 +12,19 @@ ifneq ($(findstring submodules,$(MAKECMDGOALS)),submodules)
 include submodules/linux-circuitpython-esp32/mak/circuitpython.mak
 endif
 
+download ::
+	curl --output .cache/biplane.py https://raw.githubusercontent.com/Uberi/biplane/refs/heads/main/biplane.py
+	sed -i '/print("response status/d' .cache/biplane.py
+
+staging ::
+	cp -rf .cache/biplane.py .staging/lib
+
 #
 # stage additional library code for the build
 #
 staging ::
 	cp -rf .cache/$(BUNDLE)/lib/adafruit_connection_manager.mpy .staging/lib
 	cp -rf .cache/$(BUNDLE)/lib/adafruit_hashlib* .staging/lib
-	cp -rf .cache/$(BUNDLE)/lib/adafruit_httpserver .staging/lib
 	cp -rf .cache/$(BUNDLE)/lib/adafruit_ntp* .staging/lib
 	cp -rf .cache/$(BUNDLE)/lib/adafruit_requests* .staging/lib
 	cp -rf .cache/$(BUNDLE)/lib/adafruit_ticks* .staging/lib
