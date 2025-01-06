@@ -209,7 +209,7 @@ $(document).ready(function() {
     // show the initial page
     //
     $('.application').hide ();
-    proximity').show ();
+    $('#proximity').show ();
     //$('#configure').show ();
 
 
@@ -263,6 +263,12 @@ $('.proximity-apply_changes').click (function () {
     console.log (configuration);
 });
 
+//
+// restart the system
+//
+$('.proximity-restart').click (function () {
+    $.get ('/api/v1/restart');
+});
 
 
 //

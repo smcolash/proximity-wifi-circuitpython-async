@@ -9,6 +9,11 @@
 .staging
 
 #
+# ignore the upload timestemp file
+#
+.upload
+
+#
 # ignore the REPL log
 #
 repl.log

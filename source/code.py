@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import adafruit_hashlib as hashlib
-import adafruit_ntp
+import adafruit_ntp as ntp
 import adafruit_requests as requests
 import circuitpython_hmac as hmac
 
@@ -23,6 +23,8 @@ import wifi
 
 import biplane
 
+BUSY = 0
+
 # ------------------------------------------------------------
 
 def logger (text):
@@ -39,6 +41,12 @@ def error (text):
 
 def fixme (text):
     logger (f'FIXME :: {text}')
+
+def emphasis (text):
+    length = len (text) + 6
+    logger ('*' * length)
+    logger (f'** {text} **')
+    logger ('*' * length)
 
 # ------------------------------------------------------------
 
@@ -227,12 +235,10 @@ class TuyaOutput (Output):
         if self.pending:
             pool = socketpool.SocketPool (wifi.radio)
 
-            ntp = adafruit_ntp.NTP (pool, tz_offset=0)
-            now = int (time.mktime (ntp.datetime) * 1000)
-
             #
             # invalidate an older access token
             #
+            now = int (time.mktime (ntp.NTP (pool, tz_offset=0).datetime) * 1000)
             if now - self.timestamp > (self.timeout - 60):
                 self.timestamp = now
                 self.token = ''
@@ -396,7 +402,7 @@ async def packet_sniffer_task (configuration, lock):
     #
     while True:
         gc.collect ()
-        await asyncio.sleep (0)
+        await asyncio.sleep (1.0)
 
         #
         # wait to be connected to an access point
@@ -411,13 +417,17 @@ async def packet_sniffer_task (configuration, lock):
             continue
 
         #
+        # wait until the web server is idle
+        #
+        if BaseResponse.busy ():
+            continue
+
+        #
         # start monitoring packets
         #
         monitor = wifi.Monitor (channel=wifi.radio.ap_info.channel)
 
-        logger ('-' * 35)
-        info (f'listening on channel {wifi.radio.ap_info.channel}')
-        logger ('-' * 35)
+        emphasis (f'listening on channel {wifi.radio.ap_info.channel}')
 
         while wifi.radio.connected:
             gc.collect ()
@@ -425,6 +435,14 @@ async def packet_sniffer_task (configuration, lock):
 
             try:
                 async with lock:
+                    #
+                    # temporarily stop to finish web responses
+                    #
+                    if BaseResponse.busy ():
+                        info ('waiting for http responses to complete')
+                        monitor.deinit ()
+                        break
+
                     #
                     # temporarily stop to synchronize outputs
                     #
@@ -453,27 +471,59 @@ async def packet_sniffer_task (configuration, lock):
         info ('stopped packet analysis')
 
 class BaseResponse (biplane.Response):
-    def __init__(self, status_code=200, content_type="text/plain", headers={}):
+    timestamp = 0
+
+    @classmethod
+    def update (cls):
+        BaseResponse.timestamp = time.time ()
+
+    @classmethod
+    def busy (cls, delta=1):
+        return (time.time () - BaseResponse.timestamp) < delta
+
+    def __init__(self, status_code=200, content_type='text/plain', headers={}):
         self.status_code = status_code
         self.headers = headers
-        self.headers["content-type"] = content_type
+        self.headers['content-type'] = content_type
+        self.update ()
 
     def serialize(self):
-        response = bytearray(f"HTTP/1.1 {self.status_code} {self.status_code}\r\n".encode("ascii"))
+        self.update ()
+        response = bytearray(f'HTTP/1.1 {self.status_code} {self.status_code}\r\n'.encode('ascii'))
         yield response
 
         for name, value in self.headers.items():
-            yield f"{name}: {value}\r\n".encode("ascii")
+            yield f'{name}: {value}\r\n'.encode('ascii')
 
-        yield b"\r\n"
+        yield b'\r\n'
+
+class Response (BaseResponse):
+    def __init__(self, data, action=None, status_code=200, content_type='application/json', headers={}):
+        super ().__init__ (status_code, content_type, headers)
+
+        self.data = data
+        self.action = action
+
+        self.length = len (self.data)
+        self.headers['content-length'] = self.length
+        self.headers['cache-control'] = 'no-cache'
+
+    def serialize(self):
+        yield from super ().serialize ()
+        yield self.data
+
+        if self.action:
+            self.action ()
 
 class FileResponse (BaseResponse):
-    def __init__(self, path, status_code=200, content_type="text/plain", headers={}):
+    def __init__(self, path, status_code=200, content_type='text/plain', headers={}):
         super ().__init__ (status_code, content_type, headers)
 
         self.path = path
         self.length = os.stat (self.path)[6]
-        self.headers["content-length"] = self.length
+        self.headers['content-length'] = self.length
+        self.headers['cache-control'] = 'max-age=86400'
+        self.headers['cache-control'] = 'no-cache'
 
     def serialize(self):
         yield from super ().serialize ()
@@ -486,17 +536,35 @@ class FileResponse (BaseResponse):
                 yield buffer
        
 class JSONResponse (BaseResponse):
-    def __init__(self, data, status_code=200, content_type="application/json", headers={}):
+    def __init__(self, data, status_code=200, content_type='application/json', headers={}):
         super ().__init__ (status_code, content_type, headers)
 
         self.data = json.dumps (data)
         self.length = len (self.data)
-        self.headers["content-length"] = self.length
+        self.headers['content-length'] = self.length
+        self.headers['cache-control'] = 'no-cache'
 
     def serialize(self):
         yield from super ().serialize ()
-
         yield self.data
+
+class SSEResponse (BaseResponse):
+    def __init__(self, generator, status_code=200, content_type='text/event-stream', headers={}):
+        super ().__init__ (status_code, content_type, headers)
+
+        self.generator = generator
+        self.headers['cache-control'] = 'no-cache'
+        self.headers['connection'] = 'keep-alive'
+
+    def serialize(self):
+        yield from super ().serialize ()
+        yield from self.generator ()
+
+    def send_event (self):
+        data = json.dumps ({'a': 1234})
+        yield b'event: zxcv' + b'\r\n'
+        yield f'data: {data}'.encode ('ascii') + b'\r\n'
+        yield b'\r\n'
 
 #
 # task to provide a web interface for status and configuration
@@ -505,17 +573,33 @@ async def web_server_task (configuration, lock):
 
     server = biplane.Server ()
 
+    #
+    # page content
+    #
     @server.route ('/', 'GET')
     def handler (query_parameters, headers, body):
         return FileResponse ('assets/index.html', content_type='text/html')
 
+    #
+    # page styles
+    #
     @server.route ('/styles.css', 'GET')
     def handler (query_parameters, headers, body):
         return FileResponse ('assets/styles.css', content_type='text/css')
 
-    @server.route ('/favicon.png', 'GET')
+    #
+    # page code
+    #
+    @server.route ('/main.js', 'GET')
     def handler (query_parameters, headers, body):
-        return FileResponse ('assets/favicon.png', content_type='image/png')
+        return FileResponse ('assets/main.js', content_type='text/javascript')
+
+    #
+    # icons
+    #
+    @server.route ('/eye-fill.svg', 'GET')
+    def handler (query_parameters, headers, body):
+        return FileResponse ('assets/eye-fill.svg', content_type='image/svg+xml')
 
     @server.route ('/file-earmark-plus.svg', 'GET')
     def handler (query_parameters, headers, body):
@@ -525,10 +609,6 @@ async def web_server_task (configuration, lock):
     def handler (query_parameters, headers, body):
         return FileResponse ('assets/file-earmark-check.svg', content_type='image/svg+xml')
 
-    @server.route ('/main.js', 'GET')
-    def handler (query_parameters, headers, body):
-        return FileResponse ('assets/main.js', content_type='text/javascript')
-
     @server.route ('/trash3.svg', 'GET')
     def handler (query_parameters, headers, body):
         return FileResponse ('assets/trash3.svg', content_type='image/svg+xml')
@@ -537,48 +617,48 @@ async def web_server_task (configuration, lock):
     def handler (query_parameters, headers, body):
         return FileResponse ('assets/secrets.json', content_type='image/svg+xml')
 
-
+    #
+    # supporting REST API
+    #
     @server.route ('/api/v1/config', 'GET')
     def handler (query_parameters, headers, body):
         return JSONResponse (configuration)
 
+    @server.route ('/api/v1/restart', 'GET')
+    def handler (query_parameters, headers, body):
 
+        def action ():
+            microcontroller.reset ()
 
-    pool = socketpool.SocketPool (wifi.radio)
-    with pool.socket () as socket:
-        for _ in server.start (socket, listen_on=('0.0.0.0', 80), max_parallel_connections=1):
-            await asyncio.sleep (0)
+        return Response ('rebooting', action=action)
 
+    @server.route ('/api/v1/events', 'GET')
+    def handler (query_parameters, headers, body):
 
+        '''
+        async def task (sse):
+            try:
+                for loop in range (50):
+                    await asyncio.sleep (1.0)
+                    sse.send_event (json.dumps ({'index': loop}), event="event_name")
+            except:
+                pass
 
+            sse.close()
+        '''
 
+        def generator ():
+            for loop in range (50):
+                time.sleep (0.5)
 
+                data = json.dumps ({'a': 1234})
+                yield b'event: zxcv' + b'\r\n'
+                yield f'data: {data}'.encode ('ascii') + b'\r\n'
+                yield b'\r\n'
 
-
+        return SSEResponse (generator)
 
     '''
-    fixme ('D1')
-    #import adafruit_httpserver as httpserver
-
-    fixme ('D2')
-    pool = socketpool.SocketPool (wifi.radio)
-    #pool = configuration['system']['pool']
-    server = httpserver.Server (pool, '/assets', debug=True)
-
-    fixme ('D3')
-    @server.route ('/', 'GET')
-    def handler (request: httpserver.Request):
-        return httpserver.FileResponse (request, "/index.html")
-
-    @server.route ('/api/v1/config', 'GET')
-    def handler (request: httpserver.Request):
-        return httpserver.JSONResponse (request, configuration)
-
-    @server.route ('/api/v1/status', 'GET')
-    def handler (request: httpserver.Request):
-        data = {'status': {}}
-        return httpserver.JSONResponse (request, data)
-
     @server.route ('/api/v1/events', 'GET')
     def handler( request: httpserver.Request):
 
@@ -596,28 +676,43 @@ async def web_server_task (configuration, lock):
         asyncio.create_task (task (sse))
 
         return sse
-
-    fixme ('D4')
-    while True:
-        #
-        # start the web server
-        #
-        try:
-            fixme ('D5')
-            server.start ('0.0.0.0', 80)
-
-            fixme ('D6')
-            while True:
-                server.poll ()
-                await asyncio.sleep (0)
-
-        except asyncio.CancelledError:
-            info ('web server task cancelled')
-            return
-
-        except Exception as e:
-            logger ('\n'.join (traceback.format_exception (e)))
     '''
+
+
+
+    @server.route('/fml', 'GET')
+    async def handler (query_parameters, headers, body):
+        async def event_stream():
+            while True:
+                # Generate or fetch data for the event
+                data = 'Hello from SSE!'
+
+                # Format the event according to the SSE protocol
+                event = f'data: {data}\n\n'
+
+                # Yield the event to the client
+                yield event.encode()
+
+                # Wait for a specified interval
+                await asyncio.sleep(1)
+
+        # Set the appropriate headers for SSE
+        headers = {
+            'content-type': 'text/event-stream',
+            'cache-control': 'no-cache',
+            'connection': 'keep-alive',
+        }
+
+        # Return the event stream as a response
+        return Response(event_stream(), headers=headers)
+
+
+
+
+    pool = socketpool.SocketPool (wifi.radio)
+    with pool.socket () as socket:
+        for _ in server.start (socket, listen_on=('0.0.0.0', 80), max_parallel_connections=1):
+            await asyncio.sleep (0)
 
 #
 # task to monitor button and set system mode
@@ -627,6 +722,11 @@ async def configuration_task (configuration, lock):
     button = digitalio.DigitalInOut (microcontroller.pin.GPIO0)
     button.direction = digitalio.Direction.INPUT
     button.pull = digitalio.Pull.UP
+
+    if 'D2' not in GPIOOutput.gpio:
+        GPIOOutput.gpio['D2'] = digitalio.DigitalInOut (getattr (board, 'D2'))
+        GPIOOutput.gpio['D2'] = digitalio.Direction.OUTPUT
+    led = GPIOOutput.gpio['D2']
 
     mdns_server = mdns.Server (wifi.radio)
     mdns_server.hostname = configuration['system']['hostname']
@@ -649,15 +749,22 @@ async def configuration_task (configuration, lock):
     if len (configuration['wifi']) == 0:
         station = False
 
+    button_delay = 5
     interval = 0.25
     count = 0
 
     while True:
         if button.value == False:
-            count = min (5 / interval, count + 1)
-            fixme (count)
+            count = min (button_delay / interval, count + 1)
+
+            #
+            # blink the LED when ready to change mode
+            #
+            if count == button_delay / interval:
+                led.value = not led.value
         else:
-            if count == 5 / interval:
+            if count == button_delay / interval:
+                led.value = 0
                 info ('changing mode')
                 station = station ^ True
                 ready = False
@@ -704,6 +811,8 @@ async def configuration_task (configuration, lock):
                         break
                     except Exception as e:
                         logger ('\n'.join (traceback.format_exception (e)))
+                        error ('unrecoverable condition')
+                        microcontroller.reset ()
 
                 #
                 # wait and try again if not connected
