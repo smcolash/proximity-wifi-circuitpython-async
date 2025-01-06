@@ -597,6 +597,10 @@ async def web_server_task (configuration, lock):
     #
     # icons
     #
+    @server.route ('/incognito.svg', 'GET')
+    def handler (query_parameters, headers, body):
+        return FileResponse ('assets/incognito.svg', content_type='image/svg+xml')
+
     @server.route ('/eye-fill.svg', 'GET')
     def handler (query_parameters, headers, body):
         return FileResponse ('assets/eye-fill.svg', content_type='image/svg+xml')

@@ -6,14 +6,14 @@
     <title>Proximity</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
     <link rel="stylesheet" href="styles.css">
-    <link rel="icon" type="xml/svg" href="eye-fill.svg">
+    <link rel="icon" type="xml/svg" href="incognito.svg">
   </head>
   <body>
 
 <nav class="navbar navbar-expand-sm navbar-dark bg-dark mb-3">
   <div class="container">
     <a class="navbar-brand nav-link" href="#">
-      <img class="bi me-2" width="40" height="40" role="img" style="filter: invert(75%);" src="eye-fill.svg">
+      <img class="bi me-2" width="40" height="40" role="img" style="filter: invert(75%);" src="incognito.svg">
     </a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
@@ -45,22 +45,20 @@
     <h1>Proximity</h1>
     <div class="col-lg-12">
       <p class="fs-5">
-      Main page...
-      Describe what this is and how it works.
+      The proximity device listens for a set of configured WiFi 'beacons' as
+      triggers to turn on a set of configured outputs. This different from other
+      active approaches, like geofencing, in that the identification of the beacon
+      devices is entirely passive.
       </p>
       <p class="fs-5">
-      Describe the part os this UI</p>
-
-
+      Basic concepts:
+      </p>
       <ul>
           <li>A location has one or more WiFi routers.</li>
           <li>A beacon may move between locations.</li>
-          <li>An output may be anywhere.</li>
+          <li>The identification of a beacon in a given location triggers a set of outputs for a configured amount of time.</li>
+          <li>An output may be anywhere, not necessarily at the same location where the beacon was identified.</li>
       </ul>
-
-      <p>when observed to be at a [location], a [beacon] triggers the [list of outputs]</p>
-
-
     </div>
   </div>
 
@@ -106,11 +104,10 @@
 
   <div id="debug" class="application" style="display: none;">
     <h1>Debug</h1>
-    <div class="col-lg-12 px-0">
+    <div class="col-lg-12 px-0 mb-3">
       <p class="fs-5">
       Status: connected
       </p>
-
       <div class="list">
         <div>asdf</div>
         <div>asdf</div>
@@ -135,10 +132,10 @@
         <div>asdf</div>
         <div>asdf</div>
       </div>
+    </div>
 
         <button type="button" class="btn btn-primary proximity-restart">Restart</button>
 
-    </div>
   </div>
 
   <div id="configure" class="application" style="display: none;">
