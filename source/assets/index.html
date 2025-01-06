@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="icon" type="xml/svg" href="incognito.svg">
   </head>
+
   <body>
 
 <nav class="navbar navbar-expand-sm navbar-dark bg-dark mb-3">
@@ -19,7 +20,7 @@
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+      <ul class="navbar-nav me-auto">
         <li class="nav-item">
           <a class="nav-link" href="#">Configure</a>
         </li>
@@ -30,7 +31,7 @@
           <a class="nav-link" href="#">Debug</a>
         </li>
       </ul>
-      <ul class="navbar-nav mb-2 mb-lg-0">
+      <ul class="navbar-nav">
         <li class="nav-item">
           <a class="nav-link" aria-current="page" href="#">About</a>
         </li>
@@ -39,7 +40,8 @@
   </div>
 </nav>
 
-<div id="main" class="container mb-3">
+<div class="container-fluid mb-3" style="display: flex; flex: 1 1 auto; overflow-y: hidden;">
+<div id="main" class="container mb-3" style="display: flex; flex: 1 1 auto; overflow-y: auto;">
 
   <div id="proximity" class="application" style="display: none;">
     <h1>Proximity</h1>
@@ -104,38 +106,90 @@
 
   <div id="debug" class="application" style="display: none;">
     <h1>Debug</h1>
-    <div class="col-lg-12 px-0 mb-3">
-      <p class="fs-5">
-      Status: connected
-      </p>
-      <div class="list">
-        <div>asdf</div>
-        <div>asdf</div>
-        <div>asdf</div>
-        <div>asdf</div>
-        <div>asdf</div>
-        <div>asdf</div>
-        <div>asdf</div>
-        <div>asdf</div>
-        <div>asdf</div>
-        <div>asdf</div>
-        <div>asdf</div>
-        <div>asdf</div>
-        <div>asdf</div>
-        <div>asdf</div>
-        <div>asdf</div>
-        <div>asdf</div>
-        <div>asdf</div>
-        <div>asdf</div>
-        <div>asdf</div>
-        <div>asdf</div>
-        <div>asdf</div>
-        <div>asdf</div>
-      </div>
+    <p class="fs-5">
+    Status: connected
+    </p>
+    <div class="rounded list mb-3" style="flex: 1 1 auto; box-shadow: inset 4rem 0 0 var(--bs-dark-bg-subtle);">
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
+      <div>asdf</div>
     </div>
 
-        <button type="button" class="btn btn-primary proximity-restart">Restart</button>
-
+      <button type="button" class="btn btn-primary proximity-restart" style="width: fit-content;">Restart</button>
   </div>
 
   <div id="configure" class="application" style="display: none;">
@@ -728,6 +782,7 @@
     </div>
   </div>
 
+</div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
